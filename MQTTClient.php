@@ -3,7 +3,7 @@
  * Implementation of MQTT 3.1.1 for PHP with SSL support
  */
 
-namespace karpy47/php-mqtt-client;
+namespace pascalwacker\PHPMqttClient;
 
 class MQTTClient {
 
@@ -79,9 +79,7 @@ class MQTTClient {
 	 * @param string $protocol Which protocol to use
 	 */
 	function __construct($address, $port=null, $protocol='tcp'){
-	    if ($this->setConnection($address, $port, $protocol)) {
-	        ;
-	    }
+	    $this->setConnection($address, $port, $protocol);
 	    $this->packetId = rand(1,100)*100; // Reduce risk of creating duplicate ids in sequential sessions
 	}
 
@@ -225,11 +223,11 @@ class MQTTClient {
 	    // Basic validation of clientid
 	    if(preg_match("/[^0-9a-zA-Z]/",$clientId)) {
 	        $this->debugMessage('ClientId can only contain characters 0-9,a-z,A-Z');
-	        return;
+	        return false;
 	    }
 	    if(strlen($clientId) > 23) {
 	        $this->debugMessage('ClientId max length is 23 characters/numbers');
-	        return;
+	        return false;
 	    }
 	    $this->clientId = $clientId;
 
@@ -331,7 +329,7 @@ class MQTTClient {
 	    $connectFlags = 0;
 		if ($this->connectCleanSession) $connectFlags += 0x02;
 	    if ($this->connectWill) {
-	        $connectflags += 0x04;
+            $connectFlags += 0x04;
 	        if ($this->connectWillQos) $connectFlags += ($this->connectWill << 3);
 	        if ($this->connectWillRetain) $connectFlags += 0x20;
 	    }
@@ -392,7 +390,7 @@ class MQTTClient {
 	public function sendPublish($topic, $message, $qos = self::MQTT_QOS1) {
 	    if(!$this->isConnected()) return false;
 
-	    if($qos!=self::MQTT_QOS0 && $qos!=self::MQTT_QOS1) return false;
+	    if(!in_array($qos, array(self::MQTT_QOS0, self::MQTT_QOS1, self::MQTT_QOS2))) return false;
 
 	    $packetId = $this->getNextPacketId();
 	    $payload = $this->createPayload($topic);
@@ -424,7 +422,8 @@ class MQTTClient {
 	        }
 
 	        // Send PUBREL
-	        $this->sendPubRel($receivedPacketId);
+            // TODO: find $receivedPacketId
+	        //$this->sendPubRel($receivedPacketId);
 
 	        // A PUBCOMP packet is expected
 	        $response = $this->waitForPacket(self::MQTT_PUBCOMP, $packetId);
@@ -598,11 +597,12 @@ class MQTTClient {
 	    $this->pingReqTime = time();
 
 	    // A PINGRESP packet is expected
-	    $response = waitForPacket(self::MQTT_PINGRESP);
-	    if($responseHeader === false) {
+	    $response = $this->waitForPacket(self::MQTT_PINGRESP);
+	    // TODO: get $responseHeader out of response
+	    /*if($responseHeader === false) {
 	        $this->debugMessage('Invalid packet received, expecting PINGRESP');
 	        return false;
-	    }
+	    }*/
 
 	    return true;
 	}
