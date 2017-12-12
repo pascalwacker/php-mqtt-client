@@ -2,7 +2,7 @@
     "name": "pascalwacker/php-mqtt-client",
     "description": "MQTT 3.1.1 library for PHP with TLS support",
     "keywords": [ "mqtt", "client", "php" ],
-    "version": "1.0.2",
+    "version": "1.0.3",
     "license": "MIT",
     "authors": [
         { 

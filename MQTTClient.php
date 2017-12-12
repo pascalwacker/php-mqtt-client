@@ -221,12 +221,12 @@ class MQTTClient {
 	    if (!$this->serverAddress) return false;
 
 	    // Basic validation of clientid
-	    if(preg_match("/[^0-9a-zA-Z]/",$clientId)) {
-	        $this->debugMessage('ClientId can only contain characters 0-9,a-z,A-Z');
+	    if(preg_match("/[^0-9a-zA-Z:-]/",$clientId)) {
+	        $this->debugMessage('ClientId can only contain characters 0-9,a-z,A-Z,:,-');
 	        return false;
 	    }
-	    if(strlen($clientId) > 23) {
-	        $this->debugMessage('ClientId max length is 23 characters/numbers');
+	    if(strlen($clientId) > 63) {
+	        $this->debugMessage('ClientId max length is 63 characters/numbers');
 	        return false;
 	    }
 	    $this->clientId = $clientId;
